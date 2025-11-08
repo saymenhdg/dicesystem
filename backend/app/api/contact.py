@@ -11,8 +11,8 @@ router = APIRouter(prefix="/api/contacts", tags=["contacts"])
 
 @router.post("", response_model=ContactResponse, status_code=status.HTTP_201_CREATED)
 def add_contact(payload: ContactCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    # payload: contact_id, alias
-    target = db.query(User).filter(User.id == payload.contact_id).first()
+    # Find contact user by username
+    target = db.query(User).filter(User.username == payload.username).first()
     if not target:
         raise HTTPException(status_code=404, detail="Contact user not found")
     if target.id == current_user.id:
@@ -33,22 +33,26 @@ def add_contact(payload: ContactCreate, current_user: User = Depends(get_current
     return ContactResponse(
         id=c.id,
         contact_id=target.id,
+        username=target.username,
         alias=c.alias,
-        created_at=c.created_at,
+        created_at=c.created_at
     )
+
 
 @router.get("", response_model=list[ContactResponse])
 def list_contacts(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     rows = db.query(Contact).filter(Contact.owner_id == current_user.id).all()
-    out: list[ContactResponse] = []
-    for c in rows:
-        out.append(ContactResponse(
+    return [
+        ContactResponse(
             id=c.id,
             contact_id=c.contact_id,
+            username=c.contact.username if c.contact else "",
             alias=c.alias,
             created_at=c.created_at,
-        ))
-    return out
+        )
+        for c in rows
+    ]
+
 
 @router.delete("/{contact_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_contact(contact_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):

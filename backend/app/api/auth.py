@@ -38,7 +38,7 @@ def _get_session_user_id(token: str) -> Optional[int]:
 
 
 def _delete_session(token: str):
-    """Invalidate a session token."""
+    
     SESSIONS.pop(token, None)
 
 
@@ -47,7 +47,7 @@ def get_current_user(
     credentials: HTTPAuthorizationCredentials = Security(security),
     db: Session = Depends(get_db),
 ) -> User:
-    """Dependency: Get the current authenticated user."""
+    
     if not credentials:
         raise HTTPException(status_code=401, detail="Missing authorization token")
 
@@ -82,7 +82,6 @@ def register(payload: UserRegister, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Username already taken")
     if db.query(User).filter(User.phone_number == payload.phone_number).first():
         raise HTTPException(status_code=400, detail="Phone number already registered")
-
     user = User(
         email=payload.email,
         username=payload.username,
@@ -98,7 +97,6 @@ def register(payload: UserRegister, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(user)
 
-
     account = Account(
         user_id=user.id,
         balance=0,
@@ -109,13 +107,11 @@ def register(payload: UserRegister, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(account)
     user.account = account
-
     return user
 
 
 @router.post("/login")
 def login(payload: LoginSchema, db: Session = Depends(get_db)):
-    """Login using username OR email, returns a session token."""
     user = db.query(User).filter(User.username == payload.username).first()
     if not user:
         user = db.query(User).filter(User.email == payload.username).first()

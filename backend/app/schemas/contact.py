@@ -1,15 +1,19 @@
 from pydantic import BaseModel
 from datetime import datetime
+from typing import Optional
 
 class ContactBase(BaseModel):
-    contact_id: int
-    alias: str | None = None
+    username: str               
+    alias: Optional[str] = None 
 
 class ContactCreate(ContactBase):
     pass
 
-class ContactResponse(ContactBase):
+class ContactResponse(BaseModel):
     id: int
+    contact_id: int
+    username: str
+    alias: Optional[str]
     created_at: datetime
 
     class Config:

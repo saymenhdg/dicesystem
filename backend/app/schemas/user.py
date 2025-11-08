@@ -30,3 +30,13 @@ class UserResponse(UserBase):
 class LoginSchema(BaseModel):
     username: str
     password: str
+
+
+class UserSearchResult(BaseModel):
+    id: int
+    username: str
+    email: EmailStr
+    full_name: str
+
+    class Config:
+        from_attributes = True

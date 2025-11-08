@@ -31,3 +31,4 @@ class User(Base):
 
     # Relationships
     account = relationship("Account", back_populates="user", uselist=False)
+    cards = relationship("Card", back_populates="user", cascade="all, delete-orphan")

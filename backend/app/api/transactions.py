@@ -8,55 +8,80 @@ from app.api.auth import get_current_user
 from app.models.user import User
 from app.models.account import Account
 from app.models.transaction import Transaction, TxType
+from app.models.card import Card, CardStatus
 from app.schemas.transaction import TransactionCreate, TransactionResponse
 
 router = APIRouter(prefix="/api/transactions", tags=["transactions"])
 
 @router.post("/send", status_code=status.HTTP_201_CREATED)
 def send_money(payload: TransactionCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    # locate receiver by id
-    receiver = db.query(User).filter(User.id == payload.receiver_id).first()
+    if not payload.receiver_id and not (payload.receiver_username and payload.receiver_username.strip()):
+        raise HTTPException(status_code=422, detail="receiver_id or receiver_username is required")
+
+    receiver_query = db.query(User)
+    receiver = None
+    if payload.receiver_id:
+        receiver = receiver_query.filter(User.id == payload.receiver_id).first()
+    elif payload.receiver_username:
+        receiver = receiver_query.filter(User.username == payload.receiver_username).first()
+
     if not receiver:
         raise HTTPException(status_code=404, detail="Receiver not found")
     if receiver.id == current_user.id:
         raise HTTPException(status_code=400, detail="Cannot transfer to yourself")
 
-    # load accounts
     sender_acct = db.query(Account).filter(Account.user_id == current_user.id).with_for_update().first()
     recv_acct = db.query(Account).filter(Account.user_id == receiver.id).with_for_update().first()
 
     if not sender_acct or not recv_acct:
         raise HTTPException(status_code=404, detail="Account missing")
 
-    if not sender_acct.card_active:
-        raise HTTPException(status_code=403, detail="Your card is not active")
-    if Decimal(sender_acct.balance or 0) < payload.amount:
+    has_active_card = (
+        db.query(Card)
+        .filter(Card.user_id == current_user.id, Card.status == CardStatus.active)
+        .first()
+    )
+
+    if not sender_acct.card_active and not has_active_card:
+        raise HTTPException(status_code=403, detail="You must activate at least one card to transfer funds")
+
+    amount = Decimal(str(payload.amount)).quantize(Decimal("0.01"))
+    if amount <= 0:
+        raise HTTPException(status_code=400, detail="Amount must be positive")
+
+    if Decimal(sender_acct.balance or 0) < amount:
         raise HTTPException(status_code=400, detail="Insufficient balance")
 
-    # balance move
-    sender_acct.balance = (Decimal(sender_acct.balance or 0) - payload.amount).quantize(Decimal("0.01"))
-    recv_acct.balance = (Decimal(recv_acct.balance or 0) + payload.amount).quantize(Decimal("0.01"))
+    sender_acct.balance = (Decimal(sender_acct.balance or 0) - amount).quantize(Decimal("0.01"))
+    recv_acct.balance = (Decimal(recv_acct.balance or 0) + amount).quantize(Decimal("0.01"))
     db.add_all([sender_acct, recv_acct])
 
-    # two rows: sender (sent) and receiver (received)
-    t1 = Transaction(
+    t_sent = Transaction(
         sender_id=current_user.id,
         receiver_id=receiver.id,
-        amount=payload.amount,
+        amount=amount,
         note=payload.description,
-        tx_type=TxType.sent
+        tx_type=TxType.sent,
     )
-    t2 = Transaction(
+    t_received = Transaction(
         sender_id=current_user.id,
         receiver_id=receiver.id,
-        amount=payload.amount,
+        amount=amount,
         note=payload.description,
-        tx_type=TxType.received
+        tx_type=TxType.received,
     )
-    db.add_all([t1, t2])
+    db.add_all([t_sent, t_received])
+    db.flush()
+
+    reference = f"TX-{t_sent.id:06d}"
+
     db.commit()
 
-    return {"message": "Transfer completed"}
+    return {
+        "message": "Transfer completed",
+        "reference": reference,
+        "transaction_id": t_sent.id,
+    }
 
 @router.get("", response_model=list[TransactionResponse])
 def list_transactions(
@@ -85,5 +110,6 @@ def list_transactions(
             amount=float(r.amount),
             description=r.note,
             timestamp=r.created_at,
+            tx_type=r.tx_type.value,
         ))
     return out
