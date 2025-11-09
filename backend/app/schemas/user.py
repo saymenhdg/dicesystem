@@ -22,6 +22,10 @@ class UserResponse(UserBase):
     id: int
     role: RoleEnum
     is_active: bool
+    country: Optional[str] = None
+    city: Optional[str] = None
+    profile_picture: Optional[str] = None
+    display_name: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -30,6 +34,14 @@ class UserResponse(UserBase):
 class LoginSchema(BaseModel):
     username: str
     password: str
+
+
+class UserUpdate(BaseModel):
+    username: Optional[str] = None
+    display_name: Optional[str] = None
+    phone_number: Optional[str] = None
+    country: Optional[str] = None
+    city: Optional[str] = None
 
 
 class UserSearchResult(BaseModel):

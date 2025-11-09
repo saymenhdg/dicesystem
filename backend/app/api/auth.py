@@ -91,6 +91,7 @@ def register(payload: UserRegister, db: Session = Depends(get_db)):
         phone_number=payload.phone_number,
         country=payload.country,
         city=payload.city,
+        display_name=f"{payload.first_name} {payload.last_name}".strip() or payload.username,
         role=payload.role,
     )
     db.add(user)

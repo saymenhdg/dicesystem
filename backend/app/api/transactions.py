@@ -56,31 +56,24 @@ def send_money(payload: TransactionCreate, current_user: User = Depends(get_curr
     recv_acct.balance = (Decimal(recv_acct.balance or 0) + amount).quantize(Decimal("0.01"))
     db.add_all([sender_acct, recv_acct])
 
-    t_sent = Transaction(
+    transaction = Transaction(
         sender_id=current_user.id,
         receiver_id=receiver.id,
         amount=amount,
         note=payload.description,
         tx_type=TxType.sent,
     )
-    t_received = Transaction(
-        sender_id=current_user.id,
-        receiver_id=receiver.id,
-        amount=amount,
-        note=payload.description,
-        tx_type=TxType.received,
-    )
-    db.add_all([t_sent, t_received])
+    db.add(transaction)
     db.flush()
 
-    reference = f"TX-{t_sent.id:06d}"
+    reference = f"TX-{transaction.id:06d}"
 
     db.commit()
 
     return {
         "message": "Transfer completed",
         "reference": reference,
-        "transaction_id": t_sent.id,
+        "transaction_id": transaction.id,
     }
 
 @router.get("", response_model=list[TransactionResponse])

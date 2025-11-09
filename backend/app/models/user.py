@@ -25,10 +25,11 @@ class User(Base):
     country = Column(String)
     city = Column(String)
     profile_picture = Column(String)
+    display_name = Column(String)
     role = Column(Enum(RoleEnum), default=RoleEnum.user, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    # Relationships
+    
     account = relationship("Account", back_populates="user", uselist=False)
     cards = relationship("Card", back_populates="user", cascade="all, delete-orphan")
