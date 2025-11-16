@@ -1,0 +1,717 @@
+{
+  "project": "DiceBank API",
+  "version": "1.0",
+  "security": {
+    "type": "http",
+    "scheme": "bearer",
+    "bearerFormat": "JWT"
+  },
+  "endpoints": [
+    {
+      "tag": "root",
+      "method": "GET",
+      "path": "/",
+      "auth": false,
+      "roles": [],
+      "params": { "path": [], "query": [] },
+      "request_example": null,
+      "headers_example": null,
+      "response_example": { "status": "running", "message": "Welcome to DiceBank API!" },
+      "source": "backend/app/main.py:50"
+    },
+
+    {
+      "tag": "auth",
+      "method": "POST",
+      "path": "/api/auth/register",
+      "auth": false,
+      "roles": [],
+      "params": { "path": [], "query": [] },
+      "request_example": {
+        "email": "alice@example.com",
+        "username": "alice",
+        "first_name": "Alice",
+        "last_name": "Liddell",
+        "phone_number": "1234567890",
+        "password": "Str0ngP@ss!",
+        "country": "UK",
+        "city": "Oxford",
+        "role": "user"
+      },
+      "headers_example": null,
+      "response_example": {
+        "id": 1,
+        "email": "alice@example.com",
+        "username": "alice",
+        "first_name": "Alice",
+        "last_name": "Liddell",
+        "phone_number": "1234567890",
+        "role": "user",
+        "is_active": true
+      },
+      "source": "backend/app/api/auth.py:76"
+    },
+    {
+      "tag": "auth",
+      "method": "POST",
+      "path": "/api/auth/login",
+      "auth": false,
+      "roles": [],
+      "params": { "path": [], "query": [] },
+      "request_example": { "username": "alice", "password": "Str0ngP@ss!" },
+      "headers_example": null,
+      "response_example": {
+        "session_token": "<token>",
+        "user": {
+          "id": 1,
+          "email": "alice@example.com",
+          "username": "alice",
+          "first_name": "Alice",
+          "last_name": "Liddell",
+          "phone_number": "1234567890",
+          "role": "user",
+          "is_active": true
+        }
+      },
+      "source": "backend/app/api/auth.py:113"
+    },
+    {
+      "tag": "auth",
+      "method": "POST",
+      "path": "/api/auth/logout",
+      "auth": true,
+      "roles": [],
+      "params": { "path": [], "query": [] },
+      "request_example": null,
+      "headers_example": { "Authorization": "Bearer <token>" },
+      "response_example": { "message": "Logged out successfully" },
+      "source": "backend/app/api/auth.py:132"
+    },
+    {
+      "tag": "auth",
+      "method": "GET",
+      "path": "/api/auth/me",
+      "auth": true,
+      "roles": [],
+      "params": { "path": [], "query": [] },
+      "request_example": null,
+      "headers_example": { "Authorization": "Bearer <token>" },
+      "response_example": {
+        "id": 1,
+        "email": "alice@example.com",
+        "username": "alice",
+        "first_name": "Alice",
+        "last_name": "Liddell",
+        "phone_number": "1234567890",
+        "role": "user",
+        "is_active": true
+      },
+      "source": "backend/app/api/auth.py:140"
+    },
+    {
+      "tag": "auth",
+      "method": "GET",
+      "path": "/api/auth/admin/users",
+      "auth": true,
+      "roles": ["admin"],
+      "params": { "path": [], "query": [] },
+      "request_example": null,
+      "headers_example": { "Authorization": "Bearer <token>" },
+      "response_example": [
+        { "id": 1, "username": "alice", "email": "alice@example.com", "role": "user", "is_active": true }
+      ],
+      "source": "backend/app/api/auth.py:146"
+    },
+    {
+      "tag": "auth",
+      "method": "PUT",
+      "path": "/api/auth/admin/users/{user_id}/status",
+      "auth": true,
+      "roles": ["admin"],
+      "params": { "path": ["user_id:int"], "query": [] },
+      "request_example": { "is_active": false },
+      "headers_example": { "Authorization": "Bearer <token>" },
+      "response_example": { "message": "User alice account status updated to inactive" },
+      "source": "backend/app/api/auth.py:159"
+    },
+    {
+      "tag": "auth",
+      "method": "POST",
+      "path": "/api/auth/admin/register_user",
+      "auth": true,
+      "roles": ["admin"],
+      "params": { "path": [], "query": [] },
+      "request_example": {
+        "email": "bob@example.com",
+        "username": "bob",
+        "first_name": "Bob",
+        "last_name": "Builder",
+        "phone_number": "9876543210",
+        "password": "An0therP@ss!",
+        "country": "US",
+        "city": "NYC",
+        "role": "support"
+      },
+      "headers_example": { "Authorization": "Bearer <token>" },
+      "response_example": {
+        "id": 2,
+        "email": "bob@example.com",
+        "username": "bob",
+        "first_name": "Bob",
+        "last_name": "Builder",
+        "phone_number": "9876543210",
+        "role": "support",
+        "is_active": true
+      },
+      "source": "backend/app/api/auth.py:178"
+    },
+    {
+      "tag": "auth",
+      "method": "POST",
+      "path": "/api/auth/admin/register_support_user",
+      "auth": true,
+      "roles": ["admin"],
+      "params": { "path": [], "query": [] },
+      "request_example": {
+        "email": "support@example.com",
+        "username": "support1",
+        "first_name": "Sup",
+        "last_name": "Port",
+        "phone_number": "5550001111",
+        "password": "SupP@ss!",
+        "country": "US",
+        "city": "SF"
+      },
+      "headers_example": { "Authorization": "Bearer <token>" },
+      "response_example": {
+        "id": 3,
+        "email": "support@example.com",
+        "username": "support1",
+        "first_name": "Sup",
+        "last_name": "Port",
+        "phone_number": "5550001111",
+        "role": "support",
+        "is_active": true
+      },
+      "source": "backend/app/api/auth.py:219"
+    },
+    {
+      "tag": "auth",
+      "method": "PUT",
+      "path": "/api/auth/admin/users/{user_id}/role",
+      "auth": true,
+      "roles": ["admin"],
+      "params": { "path": ["user_id:int"], "query": [] },
+      "request_example": { "role": "admin" },
+      "headers_example": { "Authorization": "Bearer <token>" },
+      "response_example": { "message": "User bob role updated to admin" },
+      "source": "backend/app/api/auth.py:259"
+    },
+
+    {
+      "tag": "accounts",
+      "method": "GET",
+      "path": "/api/accounts/me",
+      "auth": true,
+      "roles": [],
+      "params": { "path": [], "query": [] },
+      "request_example": null,
+      "headers_example": { "Authorization": "Bearer <token>" },
+      "response_example": {
+        "user_id": 1,
+        "balance": "100.00",
+        "card_number": "1234 **** **** 5678",
+        "card_active": true
+      },
+      "source": "backend/app/api/accounts.py:28"
+    },
+    {
+      "tag": "accounts",
+      "method": "PATCH",
+      "path": "/api/accounts/activate",
+      "auth": true,
+      "roles": [],
+      "params": { "path": [], "query": [] },
+      "request_example": { "active": true },
+      "headers_example": { "Authorization": "Bearer <token>" },
+      "response_example": { "card_active": true },
+      "source": "backend/app/api/accounts.py:40"
+    },
+    {
+      "tag": "accounts",
+      "method": "POST",
+      "path": "/api/accounts/topup",
+      "auth": true,
+      "roles": [],
+      "params": { "path": [], "query": [] },
+      "request_example": { "amount": 50.0 },
+      "headers_example": { "Authorization": "Bearer <token>" },
+      "response_example": { "message": "Top-up successful", "new_balance": "150.00" },
+      "source": "backend/app/api/accounts.py:55"
+    },
+    {
+      "tag": "accounts",
+      "method": "POST",
+      "path": "/api/accounts/withdraw",
+      "auth": true,
+      "roles": [],
+      "params": { "path": [], "query": [] },
+      "request_example": { "amount": 25.0 },
+      "headers_example": { "Authorization": "Bearer <token>" },
+      "response_example": { "message": "Withdrawal successful", "new_balance": "125.00" },
+      "source": "backend/app/api/accounts.py:72"
+    },
+    {
+      "tag": "accounts",
+      "method": "PATCH",
+      "path": "/api/accounts/{user_id}/activate",
+      "auth": true,
+      "roles": ["admin", "account_manager"],
+      "params": { "path": ["user_id:int"], "query": [] },
+      "request_example": { "active": false },
+      "headers_example": { "Authorization": "Bearer <token>" },
+      "response_example": { "user_id": 42, "card_active": false },
+      "source": "backend/app/api/accounts.py:92"
+    },
+
+    {
+      "tag": "contacts",
+      "method": "POST",
+      "path": "/api/contacts",
+      "auth": true,
+      "roles": [],
+      "params": { "path": [], "query": [] },
+      "request_example": { "username": "bob", "alias": "Bob B." },
+      "headers_example": { "Authorization": "Bearer <token>" },
+      "response_example": {
+        "id": 10,
+        "contact_id": 2,
+        "username": "bob",
+        "alias": "Bob B.",
+        "created_at": "2025-11-17T12:34:56Z"
+      },
+      "source": "backend/app/api/contact.py:12"
+    },
+    {
+      "tag": "contacts",
+      "method": "GET",
+      "path": "/api/contacts",
+      "auth": true,
+      "roles": [],
+      "params": { "path": [], "query": [] },
+      "request_example": null,
+      "headers_example": { "Authorization": "Bearer <token>" },
+      "response_example": [
+        {
+          "id": 10,
+          "contact_id": 2,
+          "username": "bob",
+          "alias": "Bob B.",
+          "created_at": "2025-11-17T12:34:56Z"
+        }
+      ],
+      "source": "backend/app/api/contact.py:42"
+    },
+    {
+      "tag": "contacts",
+      "method": "DELETE",
+      "path": "/api/contacts/{contact_id}",
+      "auth": true,
+      "roles": [],
+      "params": { "path": ["contact_id:int"], "query": [] },
+      "request_example": null,
+      "headers_example": { "Authorization": "Bearer <token>" },
+      "response_status": 204,
+      "response_example": null,
+      "source": "backend/app/api/contact.py:57"
+    },
+
+    {
+      "tag": "transactions",
+      "method": "POST",
+      "path": "/api/transactions/send",
+      "auth": true,
+      "roles": [],
+      "params": { "path": [], "query": [] },
+      "request_example": { "receiver_id": 2, "amount": 12.5, "description": "Lunch" },
+      "headers_example": { "Authorization": "Bearer <token>" },
+      "response_example": { "message": "Transfer completed", "reference": "TX-000123", "transaction_id": 123 },
+      "source": "backend/app/api/transactions.py:16"
+    },
+    {
+      "tag": "transactions",
+      "method": "GET",
+      "path": "/api/transactions",
+      "auth": true,
+      "roles": [],
+      "params": { "path": [], "query": ["direction?:sent|received", "limit?:int(1-200)", "offset?:int(>=0)"] },
+      "request_example": null,
+      "query_example": { "direction": "sent", "limit": 25, "offset": 0 },
+      "headers_example": { "Authorization": "Bearer <token>" },
+      "response_example": [
+        {
+          "id": 123,
+          "sender_id": 1,
+          "receiver_id": 2,
+          "amount": 12.5,
+          "description": "Lunch",
+          "timestamp": "2025-11-17T12:34:56Z",
+          "tx_type": "sent"
+        }
+      ],
+      "source": "backend/app/api/transactions.py:86"
+    },
+
+    {
+      "tag": "cards",
+      "method": "GET",
+      "path": "/api/cards",
+      "auth": true,
+      "roles": [],
+      "params": { "path": [], "query": [] },
+      "request_example": null,
+      "headers_example": { "Authorization": "Bearer <token>" },
+      "response_example": [
+        {
+          "id": 1,
+          "user_id": 1,
+          "design_slug": "classic",
+          "theme": "blue",
+          "card_type": "virtual",
+          "holder_name": "Alice Liddell",
+          "card_number": "1234567890123456",
+          "expiry_month": 11,
+          "expiry_year": 2029,
+          "cvv": "123",
+          "status": "active",
+          "is_primary": true,
+          "created_at": "2025-11-17T12:34:56Z"
+        }
+      ],
+      "source": "backend/app/api/cards.py:17"
+    },
+    {
+      "tag": "cards",
+      "method": "POST",
+      "path": "/api/cards",
+      "auth": true,
+      "roles": [],
+      "params": { "path": [], "query": [] },
+      "request_example": { "design_slug": "classic", "theme": "blue", "card_type": "virtual" },
+      "headers_example": { "Authorization": "Bearer <token>" },
+      "response_example": {
+        "id": 2,
+        "user_id": 1,
+        "design_slug": "classic",
+        "theme": "blue",
+        "card_type": "virtual",
+        "holder_name": "Alice Liddell",
+        "card_number": "6543210987654321",
+        "expiry_month": 11,
+        "expiry_year": 2029,
+        "cvv": "987",
+        "status": "active",
+        "is_primary": false,
+        "created_at": "2025-11-17T12:34:56Z"
+      },
+      "source": "backend/app/api/cards.py:30"
+    },
+    {
+      "tag": "cards",
+      "method": "POST",
+      "path": "/api/cards/add",
+      "auth": true,
+      "roles": [],
+      "params": { "path": [], "query": [] },
+      "request_example": {
+        "card_number": "4000123412341234",
+        "expiry_month": 12,
+        "expiry_year": 2030,
+        "cvv": "321",
+        "holder_name": "Alice Liddell",
+        "design_slug": "classic",
+        "theme": "blue",
+        "card_type": "physical"
+      },
+      "headers_example": { "Authorization": "Bearer <token>" },
+      "response_example": {
+        "id": 3,
+        "user_id": 1,
+        "design_slug": "classic",
+        "theme": "blue",
+        "card_type": "physical",
+        "holder_name": "Alice Liddell",
+        "card_number": "4000123412341234",
+        "expiry_month": 12,
+        "expiry_year": 2030,
+        "cvv": "321",
+        "status": "active",
+        "is_primary": false,
+        "created_at": "2025-11-17T12:34:56Z"
+      },
+      "source": "backend/app/api/cards.py:68"
+    },
+    {
+      "tag": "cards",
+      "method": "DELETE",
+      "path": "/api/cards/{card_id}",
+      "auth": true,
+      "roles": [],
+      "params": { "path": ["card_id:int"], "query": [] },
+      "request_example": null,
+      "headers_example": { "Authorization": "Bearer <token>" },
+      "response_status": 204,
+      "response_example": null,
+      "source": "backend/app/api/cards.py:111"
+    },
+    {
+      "tag": "cards",
+      "method": "PATCH",
+      "path": "/api/cards/{card_id}/status",
+      "auth": true,
+      "roles": [],
+      "params": { "path": ["card_id:int"], "query": [] },
+      "request_example": { "status": "frozen" },
+      "headers_example": { "Authorization": "Bearer <token>" },
+      "response_example": {
+        "id": 3,
+        "user_id": 1,
+        "design_slug": "classic",
+        "theme": "blue",
+        "card_type": "physical",
+        "holder_name": "Alice Liddell",
+        "card_number": "4000123412341234",
+        "expiry_month": 12,
+        "expiry_year": 2030,
+        "cvv": "321",
+        "status": "frozen",
+        "is_primary": false,
+        "created_at": "2025-11-17T12:34:56Z"
+      },
+      "source": "backend/app/api/cards.py:130"
+    },
+
+    {
+      "tag": "users",
+      "method": "GET",
+      "path": "/api/users/search",
+      "auth": true,
+      "roles": [],
+      "params": { "path": [], "query": ["query:str(1-64)"] },
+      "request_example": null,
+      "query_example": { "query": "ali" },
+      "headers_example": { "Authorization": "Bearer <token>" },
+      "response_example": [
+        { "id": 2, "username": "alice2", "email": "alice2@example.com", "full_name": "Alice Two" }
+      ],
+      "source": "backend/app/api/users.py:13"
+    },
+
+    {
+      "tag": "support",
+      "method": "POST",
+      "path": "/api/support/",
+      "auth": true,
+      "roles": [],
+      "params": { "path": [], "query": [] },
+      "request_example": { "subject": "Card not working", "message": "My card fails at POS" },
+      "headers_example": { "Authorization": "Bearer <token>" },
+      "response_example": {
+        "id": 1,
+        "user_id": 1,
+        "subject": "Card not working",
+        "message": "My card fails at POS",
+        "created_at": "2025-11-17T12:34:56Z"
+      },
+      "source": "backend/app/api/support.py:13"
+    },
+    {
+      "tag": "support",
+      "method": "GET",
+      "path": "/api/support/",
+      "auth": true,
+      "roles": ["admin", "support"],
+      "params": { "path": [], "query": [] },
+      "request_example": null,
+      "headers_example": { "Authorization": "Bearer <token>" },
+      "response_example": [
+        {
+          "id": 1,
+          "user_id": 1,
+          "subject": "Card not working",
+          "message": "My card fails at POS",
+          "created_at": "2025-11-17T12:34:56Z"
+        }
+      ],
+      "source": "backend/app/api/support.py:27"
+    },
+    {
+      "tag": "support",
+      "method": "GET",
+      "path": "/api/support/my/messages",
+      "auth": true,
+      "roles": [],
+      "params": { "path": [], "query": [] },
+      "request_example": null,
+      "headers_example": { "Authorization": "Bearer <token>" },
+      "response_example": [
+        {
+          "id": 1,
+          "user_id": 1,
+          "subject": "Card not working",
+          "message": "My card fails at POS",
+          "created_at": "2025-11-17T12:34:56Z"
+        }
+      ],
+      "source": "backend/app/api/support.py:35"
+    },
+    {
+      "tag": "support",
+      "method": "GET",
+      "path": "/api/support/my/messages/{message_id}/replies",
+      "auth": true,
+      "roles": [],
+      "params": { "path": ["message_id:int"], "query": [] },
+      "request_example": null,
+      "headers_example": { "Authorization": "Bearer <token>" },
+      "response_example": [
+        { "id": 5, "support_message_id": 1, "responder_id": 99, "message": "We are investigating", "created_at": "2025-11-17T13:00:00Z" }
+      ],
+      "source": "backend/app/api/support.py:40"
+    },
+    {
+      "tag": "support",
+      "method": "POST",
+      "path": "/api/support/{message_id}/reply",
+      "auth": true,
+      "roles": ["admin", "support"],
+      "params": { "path": ["message_id:int"], "query": [] },
+      "request_example": { "message": "Please provide the last four digits" },
+      "headers_example": { "Authorization": "Bearer <token>" },
+      "response_example": {
+        "id": 6,
+        "support_message_id": 1,
+        "responder_id": 99,
+        "message": "Please provide the last four digits",
+        "created_at": "2025-11-17T13:05:00Z"
+      },
+      "source": "backend/app/api/support.py:48"
+    },
+
+    {
+      "tag": "admin",
+      "method": "GET",
+      "path": "/admin/users/details",
+      "auth": false,
+      "roles": [],
+      "params": { "path": [], "query": [] },
+      "request_example": null,
+      "headers_example": null,
+      "response_example": [
+        {
+          "id": 1,
+          "email": "alice@example.com",
+          "username": "alice",
+          "first_name": "Alice",
+          "last_name": "Liddell",
+          "phone_number": "1234567890",
+          "country": "UK",
+          "city": "Oxford",
+          "role": "user",
+          "is_active": true,
+          "created_at": "2025-11-17T12:34:56Z",
+          "account": {
+            "balance": 100.0,
+            "card_active": true,
+            "cards": [
+              {
+                "card_number": "1234567890123456",
+                "card_type": "virtual",
+                "expiry_month": 11,
+                "expiry_year": 2029,
+                "status": "active",
+                "created_at": "2025-11-17T12:34:56Z"
+              }
+            ]
+          }
+        }
+      ],
+      "source": "backend/app/api/admin.py:12"
+    },
+    {
+      "tag": "admin",
+      "method": "GET",
+      "path": "/admin/users/{user_id}/details",
+      "auth": false,
+      "roles": [],
+      "params": { "path": ["user_id:int"], "query": [] },
+      "request_example": null,
+      "headers_example": null,
+      "response_example": {
+        "id": 42,
+        "email": "bob@example.com",
+        "username": "bob",
+        "first_name": "Bob",
+        "last_name": "Builder",
+        "phone_number": "9876543210",
+        "country": "US",
+        "city": "NYC",
+        "role": "support",
+        "is_active": true,
+        "created_at": "2025-11-17T12:34:56Z",
+        "account": { "balance": 50.0, "card_active": false, "cards": [] }
+      },
+      "source": "backend/app/api/admin.py:51"
+    },
+
+    {
+      "tag": "system",
+      "method": "GET",
+      "path": "/openapi.json",
+      "auth": false,
+      "roles": [],
+      "params": { "path": [], "query": [] },
+      "request_example": null,
+      "headers_example": null,
+      "response_example": { "openapi": "3.0.0", "info": { "title": "DiceBank API", "version": "1.0" } },
+      "source": "backend/app/main.py:54"
+    },
+    {
+      "tag": "system",
+      "method": "GET",
+      "path": "/docs",
+      "auth": false,
+      "roles": [],
+      "params": { "path": [], "query": [] },
+      "request_example": null,
+      "headers_example": null,
+      "response_example": { "type": "html" },
+      "source": "backend/app/main.py:54"
+    },
+    {
+      "tag": "system",
+      "method": "GET",
+      "path": "/redoc",
+      "auth": false,
+      "roles": [],
+      "params": { "path": [], "query": [] },
+      "request_example": null,
+      "headers_example": null,
+      "response_example": { "type": "html" },
+      "source": "backend/app/main.py:54"
+    },
+    {
+      "tag": "system",
+      "method": "GET",
+      "path": "/static/*",
+      "auth": false,
+      "roles": [],
+      "params": { "path": ["*"], "query": [] },
+      "request_example": null,
+      "headers_example": null,
+      "response_example": { "type": "file" },
+      "source": "backend/app/main.py:32"
+    }
+  ]
+}
+
