@@ -42,3 +42,14 @@ class CardOrderRequest(BaseModel):
 
 class CardStatusUpdate(BaseModel):
     status: CardStatusEnum
+
+
+class CardCreateRequest(BaseModel):
+    card_number: str = Field(..., max_length=16, min_length=16)
+    expiry_month: int = Field(..., ge=1, le=12)
+    expiry_year: int = Field(..., ge=2000, le=2099)
+    cvv: str = Field(..., max_length=4, min_length=3)
+    holder_name: str = Field(..., max_length=128)
+    design_slug: str = Field(..., max_length=64)
+    theme: str = Field(..., max_length=128)
+    card_type: CardTypeEnum = CardTypeEnum.virtual

@@ -1,13 +1,14 @@
 import random
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.api.auth import get_current_user
 from app.database import get_db
 from app.models.card import Card, CardStatus, CardType
 from app.models.user import User
-from app.schemas.card import CardOrderRequest, CardResponse, CardStatusUpdate
+from app.schemas.card import CardOrderRequest, CardResponse, CardStatusUpdate, CardCreateRequest
 from app.utils.cards import generate_unique_card_number
 
 router = APIRouter(prefix="/api/cards", tags=["cards"])
@@ -62,6 +63,68 @@ def order_card(
     db.commit()
     db.refresh(card)
     return card
+
+
+@router.post("/add", response_model=CardResponse, status_code=status.HTTP_201_CREATED)
+def add_card(
+    payload: CardCreateRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    existing = (
+        db.query(Card)
+        .filter(Card.card_number == payload.card_number)
+        .first()
+    )
+    if existing:
+        raise HTTPException(status_code=409, detail="Card number already exists")
+    has_active_card = (
+        db.query(Card)
+        .filter(Card.user_id == current_user.id, Card.status != CardStatus.canceled)
+        .count()
+        > 0
+    )
+
+    card = Card(
+        user_id=current_user.id,
+        design_slug=payload.design_slug,
+        theme=payload.theme,
+        card_type=CardType(payload.card_type.value),
+        holder_name=payload.holder_name,
+        card_number=payload.card_number,
+        expiry_month=payload.expiry_month,
+        expiry_year=payload.expiry_year,
+        cvv=payload.cvv,
+        status=CardStatus.active,
+        is_primary=not has_active_card,
+    )
+    db.add(card)
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="Card number already exists")
+    db.refresh(card)
+    return card
+
+
+@router.delete("/{card_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_card(
+    card_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    card = (
+        db.query(Card)
+        .filter(Card.id == card_id, Card.user_id == current_user.id)
+        .first()
+    )
+    if not card:
+        raise HTTPException(status_code=404, detail="Card not found")
+
+    db.delete(card)
+    db.commit()
+    return {"message": "Card deleted successfully"}
 
 
 @router.patch("/{card_id}/status", response_model=CardResponse)

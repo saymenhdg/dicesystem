@@ -4,20 +4,23 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.openapi.utils import get_openapi
 import os
 
-from app.database import create_db_and_tables
+from app.database import create_db_and_tables, migrate_schema
+
 from app.api.auth import router as auth_router
 from app.api.accounts import router as accounts_router
 from app.api.contact import router as contacts_router
 from app.api.transactions import router as transactions_router
 from app.api.cards import router as cards_router
 from app.api.users import router as users_router
+from app.api.support import router as support_router
+from app.api import admin, auth
 
 app = FastAPI(title="DiceBank API", version="1.0")
 
 # CORS setup
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:5175", "http://localhost:5174"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -31,6 +34,7 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 @app.on_event("startup")
 def on_startup():
     create_db_and_tables()
+    migrate_schema()
 
 # Routers
 app.include_router(auth_router)
@@ -39,6 +43,9 @@ app.include_router(contacts_router)
 app.include_router(transactions_router)
 app.include_router(cards_router)
 app.include_router(users_router)
+app.include_router(support_router)
+app.include_router(admin.router)
+app.include_router(auth.router)
 
 @app.get("/")
 def root():
@@ -69,3 +76,4 @@ def custom_openapi():
     return app.openapi_schema
 
 app.openapi = custom_openapi
+# waaaaaaaaaaaaaaaaaaaa wld l97ba
